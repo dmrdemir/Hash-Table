@@ -110,6 +110,6 @@ class good_hash_table:
         try:
             index_of_key = hash(index_of_key)
             index_of_key = index_of_key % len(self.keys)
-            return index_of_key # test
+            return 100 # test
         except:
             raise TypeError("type of value is not valid")

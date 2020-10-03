@@ -35,7 +35,7 @@ class test_map(unittest.TestCase):
 
         for i in range(11111):
             self.assertEquals(False, self.hash_table.get_value(True))
-        
+    
     # test delete all values and keys also None
     def test_batch_delete(self):        
         self.insertInstanceForTest()

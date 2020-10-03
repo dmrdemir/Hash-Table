@@ -1,125 +1,206 @@
-import unittest
-import time
 # run
 def main():
-    # quick test 
+    # test
     a = gosh_hash_Table()
-    a.insert("Ahmet", 90)
-    for i in range(11111):
-        a.insert(str(i), 1)
-    for i in range(11111):
-        print(a.contains(str(i)))
-    a.insert("Mehmet", 902)
-    a.insert("Cihan", 901)
-    print(a.contains("Ahmet"))
-    print(a.contains("Mehmet"))
-    print(a.contains("Cihan"))
-
+    
 class gosh_hash_Table:
     def __init__(self):
-        # Arrays for keys and values
-        self.keys = [None] * 9999 # key store
-        self.Values = [None] * 9999 # value store
+        # key store
+        self.keys = [None] * 9999 
+        # value store
+        self.values = [None] * 9999 
+         # in order for list to be increased length 
         self.temp = 2
-        self.len_of_key = len(self.keys)
+        # it only contains colliding values values 
+        self.colliding_indexes_list = [None] * 9999
+
+    # show values keys in a subarray
+    def items(self):
+        return [[key, self.get_value(key)] for key in self.keys
+            if key != None]
+    # show values with list
+    def values(self):
+        return [value for value in self.values if value != None]
+    # show keys with list
+    def keys(self):
+        return [key for key in self.keys if key != None]
+
     # checks whether there is key nor
     def contains(self, key):
+        if key == None:
+            raise ValueError("Element is invalid or None")
         # get index of key
-        index_of_key = self.convert_index_int(key)
+        index_key = self.convert_key_to_index(key)
+        # when function navigate on all elements it gets where it started and stop navigatin which means it find nothing
+        copy_index = index_key
         # check keys
-        if self.keys[index_of_key] == key:
+        if self.keys[index_key] == key:
             return True
-        else:
-            while True:           
-                # if key contains in array
-                if self.keys[index_of_key] == key:
+        # to make sure there is a colliding for [None, None, None, 3] case
+        elif self.colliding_indexes_list[index_key] != None:
+            while True:
+                if self.keys[index_key] == key:
                     return True
-                elif self.keys[index_of_key] == None:
+                else:
+                    index_key = (index_key + 1) % len(self.keys)
+                
+                if copy_index == index_key:
+                    return False
+        else:
+            # if there is no collision return False the value's already None, not a part of the collision
+            if self.colliding_indexes_list[index_key] != None:
+                return False
+            while True:
+                # in order to handle collision, there are two way 
+                # way 1 : store deleted indexes in a tuple and check
+                # way 2 : put previous deleted index in previous key's place 
+                if self.keys[index_key] == key:
+                    return True
+                elif self.keys[index_key] == None:
                     return False
                 else:
-                    index_of_key = (index_of_key + 1) % len(self.keys)
+                    index_key = (index_key + 1) % len(self.keys)
+                # when original index equated to copy index, it mean's the index navigated whole keys in array
+                # by writing if statement bottom to the loop, i take precaution for values.
+                if index_key == copy_index:
+                    return False
+        raise EnvironmentError("key that you're looking for couldn't be found.")
 
     def insert(self, key, value):
+        if value == None or key == None:
+            raise ValueError("Element is invalid or None")
         # try to put value in flat array without subarrays
-        index_of_key = self.convert_index_int(key)
+        index_key = self.convert_key_to_index(key)
+        # when function navigate on all elements it gets where it started and stop navigatin which means it find nothing
         # add value                         
-        if self.keys[index_of_key] == None:
-            self.keys[index_of_key] = key
-            self.Values[index_of_key] = value
+        if self.keys[index_key] == None:
+            self.keys[index_key] = key
+            self.values[index_key] = value
         else:
             # try to solve by calculating its mod with one while loop
             # dealing with colliding
+            if self.colliding_indexes_list[index_key] != index_key:
+                self.colliding_indexes_list[index_key] = index_key
+
             while True:
-                if self.Values[index_of_key] == None:
-                    self.keys[index_of_key] = key
-                    self.Values[index_of_key] = value
-                    break
-                elif self.keys[index_of_key] == key:
-                    self.Values[index_of_key] = value
+                # insert new value and key
+                if self.keys[index_key] == None:
+                    self.keys[index_key] = key
+                    self.values[index_key] = value
                     break
                 else:
-                    index_of_key = (index_of_key + 1) % len(self.keys)
-        
-        # To do, arras were filled, increase the length of the array
-        if None not in self.keys and None not in self.Values:
+                    index_key = (index_key + 1) % len(self.keys)
+
+                # for updating value 
+                if self.keys[index_key] == key:
+                    self.values[index_key] = value
+                    break
+
+        # when arrays were filled, increase the length of the array
+        if None not in self.keys and None not in self.values:
             # get copy of arrays and insert elements in new keys and values arr which have new length
             copy_of_key = self.keys
-            copy_of_value = self.Values
-
+            copy_of_value = self.values
             self.keys = [None] * (self.temp * 9999)
-            self.Values = [None] * (self.temp * 9999)
+            self.values = [None] * (self.temp * 9999)
             
             for index in range(len(copy_of_key)):
-                index_of_key = self.convert_index_int(copy_of_key[index])
                 if copy_of_key[index] != None:
+                    index_key = self.convert_key_to_index(copy_of_key[index])
                     while True:
-                        if self.keys[index_of_key] == None:
-                            self.keys[index_of_key] = copy_of_key[index]
-                            self.Values[index_of_key] = copy_of_value[index]
+                        if self.keys[index_key] == None:
+                            self.keys[index_key] = copy_of_key[index]
+                            self.values[index_key] = copy_of_value[index]
                             break
                         else:
-                            index_of_key = (index_of_key + 1) % len(self.keys)
+                            index_key = (index_key + 1) % len(self.keys)
+            
+            self.colliding_indexes_list = [None] * (9999 * self.temp)
             self.temp += 2
-        
+            
     def delete(self, key):
-        index_of_key = self.convert_index_int(key)
-        if self.keys[index_of_key] == key:
-            self.keys[index_of_key] = None
-            self.Values[index_of_key] = None
-        else:
+        # raise error
+        if key == None:
+            raise ValueError("Element is invalid or None")
+        index_key = self.convert_key_to_index(key)
+        # when function navigate on all elements it gets where it started and stop navigatin which means it find nothing
+        copy_index = index_key
+
+        if self.keys[index_key] == key:
+            self.keys[index_key] = None
+            self.values[index_key] = None
+            self.colliding_indexes_list[index_key] = None
+            
+        elif self.colliding_indexes_list[index_key] != None:
             while True:
-                if self.keys[index_of_key] == key:
-                    self.keys[index_of_key] = None
-                    self.Values[index_of_key] = None
-                    break
+                if self.keys[index_key] == key:
+                    self.keys[index_key] = None
+                    self.values[index_key] = None
+                    self.colliding_indexes_list[index_key] = None
                 else:
-                    index_of_key = (index_of_key + 1) % len(self.keys)
+                    index_key = (index_key + 1) % len(self.keys)
+                
+                if copy_index == index_key:
+                    return None
+        else:    
+            while True:
+                if self.keys[index_key] == key:
+                    self.keys[index_key] = None
+                    self.values[index_key] = None
+                    self.colliding_indexes_list[index_key] = None
+                    break
+                elif self.keys[index_key] == None:
+                    break 
+                else:
+                    index_key = (index_key + 1) % len(self.keys)
                     
+                if  copy_index == index_key:
+                    return None
+
     def get_value(self, key):
+        if key == None:
+            raise ValueError("Element is invalid or None")
         # get value O(1) without colliding
-        index_of_key = self.convert_index_int(key)
-        if self.keys[index_of_key] == key:
-            return self.Values[index_of_key]
-        else:
-            # GET VALUE CASE OF COLLİDİNG O(N)+
+        index_key = self.convert_key_to_index(key)
+        # when function navigate on all elements it gets where it started and stop navigatin which means it match nothing
+        copy_index = index_key
+        # quick get value and key
+        if self.keys[index_key] == key:
+            return self.values[index_key]
+        # to make sure there is a colliding for [1, None, 3, 4]
+        elif self.colliding_indexes_list[index_key] != None:
+            # GET Colliding Value with O(N)+ search
             while True:
                 # check same key location
-                # pull value in same key location
-                if self.keys[index_of_key] == key:
-                    return self.Values[index_of_key]
+                if self.keys[index_key] == key:
+                    return self.values[index_key]
                 else:
-                    index_of_key = (index_of_key + 1) % len(self.keys)
+                    index_key = (index_key + 1) % len(self.keys)
+                
+                if copy_index == index_key:
+                    return None
+        else:
+            while True:
+                if self.keys[index_key] == key:
+                    return self.values[index_key]
+                elif self.keys[index_key] == None:
+                    return None
+                else:
+                    index_key = (index_key + 1) % len(self.keys)
 
-            raise EnvironmentError("key that you're looking for couldn't be found.")
-                        
-    # convert index to int
-    def convert_index_int(self, index_of_key):
-        try:
-            index_of_key = hash(index_of_key)
-            index_of_key = index_of_key % len(self.keys)
-            return index_of_key
-        except:
-            raise TypeError("type of value is not valid")
+                if index_key == copy_index:
+                    return None
+
+    # convert key to index
+    def convert_key_to_index(self, index_key):
+        # raise ValueError 
+        if index_key != None: 
+            index_key = hash(index_key)
+            index_key = index_key % len(self.keys)
+            return index_key
+
+        raise TypeError("type of value is not valid")
+
 # start
 if __name__ == "__main__":
     main()
