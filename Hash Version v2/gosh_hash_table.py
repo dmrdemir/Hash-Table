@@ -50,10 +50,9 @@ class gosh_hash_Table:
             # if there is no collision return False the value's already None, not a part of the collision
             if self.colliding_indexes_list[index_key] != None:
                 return False
+
             while True:
-                # in order to handle collision, there are two way 
-                # way 1 : store deleted indexes in a tuple and check
-                # way 2 : put previous deleted index in previous key's place 
+                #store colliding indexes in an array to check 
                 if self.keys[index_key] == key:
                     return True
                 elif self.keys[index_key] == None:
@@ -164,12 +163,11 @@ class gosh_hash_Table:
         index_key = self.convert_key_to_index(key)
         # when function navigate on all elements it gets where it started and stop navigatin which means it match nothing
         copy_index = index_key
-        # quick get value and key
+        # quick get value and key O(1) without collision
         if self.keys[index_key] == key:
             return self.values[index_key]
         # to make sure there is a colliding for [1, None, 3, 4]
         elif self.colliding_indexes_list[index_key] != None:
-            # GET Colliding Value with O(N)+ search
             while True:
                 # check same key location
                 if self.keys[index_key] == key:
@@ -180,6 +178,7 @@ class gosh_hash_Table:
                 if copy_index == index_key:
                     return None
         else:
+            # used same algorithm logic for searching with o(n)
             while True:
                 if self.keys[index_key] == key:
                     return self.values[index_key]

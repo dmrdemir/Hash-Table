@@ -97,11 +97,9 @@ class test_map(unittest.TestCase):
             self.assertFalse(self.hash_table.contains(str(i)))
     # FAST
     def test_insert_none_key(self):
-        ''' it raises ValueError in case of key being None '''
         self.assertRaises(ValueError, self.hash_table.insert, None, 3232)
     # FAST
     def test_insert_none_value(self):
-        ''' if value is None, raise valueError '''
         self.assertRaises(ValueError, self.hash_table.insert, "2323", None)
     # FAST
     def test_get_none_key(self):
